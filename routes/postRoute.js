@@ -1,5 +1,5 @@
-const express = require('express');
+import express from 'express';
 
 const postRouter = express.Router();
 
-module.exports = postRouter;
+export default postRouter;
