@@ -7,6 +7,7 @@ import authRouter from './routes/authRoute.js';
 import userRouter from './routes/userRoute.js';
 import postRouter from './routes/postRoute.js';
 import testRoute from './routes/testRoute.js';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 const app = express();
@@ -17,6 +18,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.get('/', (req, res) => {
   res.send('Welcome to the Real Estate API');
