@@ -53,7 +53,7 @@ exports.loginUser= async(req,res) => {
             id: user.id,
             username: user.userName,
             email: user.email
-        }, process.env.JWT_SECRET, {expiresIn: '5d'})
+        }, process.env.JWT_SECRET, {expiresIn: 300})
         res.cookie('token', token,{
             httpOnly: true,
             maxAge: 5 * 24 * 60 * 60 * 1000 
