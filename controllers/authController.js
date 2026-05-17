@@ -19,10 +19,19 @@ export const registerUser = async (req, res) => {
       }
     });
     
+    // Normalize user shape for consistent client responses
+    const responseUser = {
+      id: newUser.id,
+      userName: newUser.userName,
+      username: newUser.userName,
+      email: newUser.email,
+      avatar: newUser.avatar ?? null,
+    };
+
     res.json({
       success: true,
       message: "User registered successfully",
-      user: newUser
+      user: responseUser
     });
   } catch (error) {
     res.status(500).json({ message: "Error registering user", error: error.message });
@@ -62,6 +71,14 @@ export const loginUser = async (req, res) => {
       isAdmin: false,
     }, process.env.JWT_SECRET, { expiresIn: '7d' }); // Changed from 300 seconds to 7 days
     
+    const responseUser = {
+      id: user.id,
+      userName: user.userName,
+      username: user.userName,
+      email: user.email,
+      avatar: user.avatar ?? null,
+    };
+
     res.cookie('token', token, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
@@ -69,11 +86,7 @@ export const loginUser = async (req, res) => {
       success: true,
       message: "User logged in successfully",
       token,
-      user: {
-        id: user.id,
-        username: user.userName,
-        email: user.email
-      }
+      user: responseUser
     });
   } catch (error) {
     res.json({
