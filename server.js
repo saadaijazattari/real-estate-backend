@@ -8,6 +8,8 @@ import userRouter from './routes/userRoute.js';
 import postRouter from './routes/postRoute.js';
 import testRoute from './routes/testRoute.js';
 import cookieParser from 'cookie-parser';
+import chatRouter from './routes/chatRoute.js';
+import messageRouter from './routes/messageRoute.js';
 
 dotenv.config();
 const app = express();
@@ -29,6 +31,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/posts', postRouter);
 app.use('/api/test', testRoute);
+app.use('/api/chats', chatRouter);
+app.use('/api/messages', messageRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
