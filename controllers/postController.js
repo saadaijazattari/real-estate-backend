@@ -1,4 +1,5 @@
 import prisma from "../lib/prisma.js";
+import jwt from "jsonwebtoken";
 
 export const getPosts = async (req, res) => {
   const query = req.query;
@@ -24,27 +25,56 @@ export const getPosts = async (req, res) => {
 }
 
 export const getPost = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const post = await prisma.post.findUnique({
-        where: {id},
-        include: {
-          postDetail: true,
-          user: {
-            select : {
-              userName: true,
-              avatar: true
-            }
-          }
-        }
-      });
-      res.status(200).json(post)
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: 'failed to get post' });
-      
+  const id = req.params.id;
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id },
+      include: {
+        postDetail: true,
+        user: {
+          select: {
+            userName: true,
+            avatar: true,
+          },
+        },
+      },
+    });
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
     }
-}
+
+    const token = req.cookies?.token;
+    let isSaved = false;  // ✅ Default value
+
+    // ✅ Fix: Don't send response inside callback
+    if (token) {
+      try {
+        // Use promise-based verification instead of callback
+        const payload = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const saved = await prisma.savedPost.findUnique({
+          where: {
+            userId_postId: {
+              postId: id,
+              userId: payload.id,
+            },
+          },
+        });
+        isSaved = saved ? true : false;
+      } catch (err) {
+        console.log("Token verification failed:", err.message);
+        // Token invalid - continue with isSaved = false
+      }
+    }
+
+    // ✅ Send SINGLE response with ALL data
+    res.status(200).json({ ...post, isSaved });
+    
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Failed to get post" });
+  }
+};
 
 // server/controllers/postController.js
 
