@@ -3,8 +3,8 @@ import jwt from "jsonwebtoken";
 
 export const getPosts = async (req, res) => {
   const query = req.query;
-    try {
-      const posts = await prisma.post.findMany({
+  try {
+    const posts = await prisma.post.findMany({
       where: {
         city: query.city || undefined,
         type: query.type || undefined,
@@ -16,13 +16,12 @@ export const getPosts = async (req, res) => {
         },
       },
     });
-      res.status(200).json(posts)
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: 'failed to get posts' });
-      
-    }
-}
+    res.status(200).json(posts);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "failed to get posts" });
+  }
+};
 
 export const getPost = async (req, res) => {
   const id = req.params.id;
@@ -45,12 +44,12 @@ export const getPost = async (req, res) => {
     }
 
     const token = req.cookies?.token;
-    let isSaved = false;  // ✅ Default value
+    let isSaved = false; 
 
-    // ✅ Fix: Don't send response inside callback
+    
     if (token) {
       try {
-        // Use promise-based verification instead of callback
+        
         const payload = jwt.verify(token, process.env.JWT_SECRET_KEY);
         const saved = await prisma.savedPost.findUnique({
           where: {
@@ -63,31 +62,30 @@ export const getPost = async (req, res) => {
         isSaved = saved ? true : false;
       } catch (err) {
         console.log("Token verification failed:", err.message);
-        // Token invalid - continue with isSaved = false
+        
       }
     }
 
-    // ✅ Send SINGLE response with ALL data
-    res.status(200).json({ ...post, isSaved });
     
+    res.status(200).json({ ...post, isSaved });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Failed to get post" });
   }
 };
 
-// server/controllers/postController.js
+
 
 export const addPost = async (req, res) => {
   const body = req.body;
   const tokenUserId = req.userId;
-  
+
   if (!tokenUserId) {
-    return res.status(401).json({ message: 'Unauthorized' });
+    return res.status(401).json({ message: "Unauthorized" });
   }
-  
+
   try {
-    // ✅ Explicitly handle all fields
+    
     const newPost = await prisma.post.create({
       data: {
         title: body.postData.title,
@@ -97,8 +95,12 @@ export const addPost = async (req, res) => {
         city: body.postData.city,
         bedroom: parseInt(body.postData.bedroom),
         bathroom: parseInt(body.postData.bathroom),
-        latitude: body.postData.latitude ? parseFloat(body.postData.latitude) : null,
-        longitude: body.postData.longitude ? parseFloat(body.postData.longitude) : null,
+        latitude: body.postData.latitude
+          ? parseFloat(body.postData.latitude)
+          : null,
+        longitude: body.postData.longitude
+          ? parseFloat(body.postData.longitude)
+          : null,
         type: body.postData.type,
         property: body.postData.property,
         userId: tokenUserId,
@@ -109,64 +111,64 @@ export const addPost = async (req, res) => {
             pet: body.postDetail.pet,
             income: body.postDetail.income,
             size: body.postDetail.size ? parseInt(body.postDetail.size) : null,
-            school: body.postDetail.school ? parseInt(body.postDetail.school) : null,
+            school: body.postDetail.school
+              ? parseInt(body.postDetail.school)
+              : null,
             bus: body.postDetail.bus ? parseInt(body.postDetail.bus) : null,
-            restaurant: body.postDetail.restaurant ? parseInt(body.postDetail.restaurant) : null
-          }
-        }
-      }
+            restaurant: body.postDetail.restaurant
+              ? parseInt(body.postDetail.restaurant)
+              : null,
+          },
+        },
+      },
     });
-    
+
     console.log("Post created with coordinates:", {
       id: newPost.id,
       latitude: newPost.latitude,
-      longitude: newPost.longitude
+      longitude: newPost.longitude,
     });
-    
+
     res.status(201).json(newPost);
-    
   } catch (error) {
     console.log("Error creating post:", error);
-    res.status(500).json({ message: 'failed to create post' });
+    res.status(500).json({ message: "failed to create post" });
   }
 };
 
-
 export const updatePost = async (req, res) => {
-    try {
-      res.status(200).json({
-
-      })
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: 'failed to update posts' });
-      
-    }
-}
-
+  try {
+    res.status(200).json({});
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "failed to update posts" });
+  }
+};
 
 export const deletePosts = async (req, res) => {
-  const {id} = req.params
-  const tokenUserId = req.userId
-    try {
-      const post = await prisma.post.findUnique({
-        where: {
-          id
-        }      });
-      if(post.userId !== tokenUserId) {
-        return res.status(403).json({ message: 'you are not authorized to delete this post' });
-      }
-      await prisma.post.delete({
-        where: {
-          id
-        }
-      });
-      res.status(200).json({
-        message: 'post deleted successfully'
-      })
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: 'failed to delete posts' });
-      
+  const { id } = req.params;
+  const tokenUserId = req.userId;
+  try {
+    const post = await prisma.post.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (post.userId !== tokenUserId) {
+      return res
+        .status(403)
+        .json({ message: "you are not authorized to delete this post" });
     }
-}
+    await prisma.post.delete({
+      where: {
+        id,
+      },
+    });
+    res.status(200).json({
+      message: "post deleted successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "failed to delete posts" });
+  }
+};

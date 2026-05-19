@@ -4,7 +4,6 @@ import bcrypt from "bcrypt";
 export const getUsers = async (req, res) => {
   try {
     const users = await prisma.user.findMany();
-    // Normalize each user to include `username` alias and consistent fields
     const normalized = users.map(u => ({
       id: u.id,
       userName: u.userName,
@@ -162,6 +161,28 @@ export const profilePosts = async (req, res) => {
 
     const savedPosts = saved.map((item) => item.post);
     res.status(200).json({ userPosts, savedPosts });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Failed to get profile posts!" });
+  }
+};
+
+export const getNotificationNumber = async (req, res) => {
+  const tokenUserId = req.userId;
+  try {
+    const number = await prisma.chat.count({
+      where: {
+        userIDs: {
+          hasSome: [tokenUserId],
+        },
+        NOT: {
+          seenBy: {
+            hasSome: [tokenUserId],
+          },
+        },
+      },
+    });
+    res.status(200).json(number);
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Failed to get profile posts!" });

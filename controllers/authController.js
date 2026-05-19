@@ -19,7 +19,6 @@ export const registerUser = async (req, res) => {
       }
     });
     
-    // Normalize user shape for consistent client responses
     const responseUser = {
       id: newUser.id,
       userName: newUser.userName,
@@ -38,7 +37,6 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// authRoute.js - loginUser function
 export const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -63,13 +61,12 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    // FIX: Use JWT_SECRET (not JWT_SECRET_KEY)
     const token = jwt.sign({
       id: user.id,
       username: user.userName,
       email: user.email,
       isAdmin: false,
-    }, process.env.JWT_SECRET, { expiresIn: '7d' }); // Changed from 300 seconds to 7 days
+    }, process.env.JWT_SECRET, { expiresIn: '7d' }); 
     
     const responseUser = {
       id: user.id,
@@ -81,7 +78,7 @@ export const loginUser = async (req, res) => {
 
     res.cookie('token', token, {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000 
     }).json({
       success: true,
       message: "User logged in successfully",
